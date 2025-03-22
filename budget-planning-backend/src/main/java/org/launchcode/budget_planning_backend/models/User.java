@@ -2,7 +2,6 @@ package org.launchcode.budget_planning_backend.models;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -25,14 +24,11 @@ public class User extends BaseAbstractEntity{
     @NotBlank(message = "Date of Birth is required")
     private Date dateOfBirth;
 
-    @NotNull
     @NotBlank(message = "Username is required")
     @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
     private String username;
 
-    @NotNull
     @NotBlank(message = "Password is required")
-    private String password;
     private String pwHash;
 
     @NotBlank(message = "Email is required")
@@ -40,7 +36,7 @@ public class User extends BaseAbstractEntity{
     private String email;
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-  
+
     private AccountType accountType;
 
     public User(String firstName, String lastName, Date dateOfBirth, String username, String password, String email) {
@@ -55,10 +51,6 @@ public class User extends BaseAbstractEntity{
     }
 
     public User(){}
-
-    public User(String username, String password) {
-        super();
-    }
 
     public String getFirstName() {
         return firstName;
@@ -92,12 +84,12 @@ public class User extends BaseAbstractEntity{
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPwHash() {
+        return pwHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPwHash(String password) {
+        this.pwHash = encoder.encode(password);
     }
 
     public String getEmail() {
