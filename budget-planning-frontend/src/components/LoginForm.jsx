@@ -1,41 +1,49 @@
 import { useState, useEffect } from "react";
-import ReactDOM from 'react-dom/client';
 import '../index.css'
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
+import PasswordInputField from "./PasswordInputField";
+import TextInputField from "./TextInputField";
 
 export default function LoginForm () {
 
     const initialValues = { username: "", password: "" };
-    const [formValues, setFormValues] = useState(initialValues);
+    const [formData, setFormData] = useState(initialValues);
     const [formErrors, setFormErrors] = useState({});
     const [isSubmit, setIsSubmit] = useState(false);
 
-           const handleSubmit = (event) => {
+           let navigate = useNavigate();
+           const routeChange = () =>{
+                 event.preventDefault();
+                 let path = `/register`;
+                 navigate(path);
+           };
+
+           const handleSubmit = async (event) => {
               event.preventDefault();
-              setFormErrors(validate(formValues));
+              setFormErrors(validate(formData));
               setIsSubmit(true);
-              fetch("http://localhost:8080/user/login", {
+
+              if (Object.keys(formErrors).length > 0) return;
+
+              const response = await fetch("http://localhost:8080/user/login", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(user)
-        })
-      };
-
-      const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormValues({ ...formValues, [name]: value });
-      };
-
-  let navigate = useNavigate();
-    const routeChange = () =>{
-      let path = `/register`;
-      navigate(path);
-      };
+                          credentials: "include",
+                          body: JSON.stringify(formData)
+        });
+                if(response.ok) {
+                    const data = await response.json();
+                          navigate("/dashboard"); // Redirect to this page after login, can change to home if preferred
+                        } else {
+                          const errorData = await response.json();
+                          alert(errorData.message || "Login failed");
+                        }
+                      };
 
       useEffect(() => {
           if (Object.keys(formErrors).length === 0 && isSubmit) {
-            console.log(formValues);
+            console.log(formData);
           }
         }, [formErrors]);
 
@@ -59,36 +67,18 @@ export default function LoginForm () {
         };
 
       return (
-        <div className="container">
         <form onSubmit={handleSubmit}>
             <h1>Login</h1>
-                       <label>Username:
-                           <input
-                           type="text"
-                           name="username"
-                           value={formValues.username}
-                           onChange={handleChange}
-                           />
-                       </label>
-                       <p>{formErrors.username}</p>
+            <div>
+                <TextInputField label="Username" name="username" value={formData.username} setFormData={setFormData} />
+                <p>{formErrors.username}</p>
 
-                       <label>Password:
-                           <input
-                           type="password"
-                           name="password"
-                           value={formValues.password}
-                           onChange={handleChange}
-                           />
-                       </label>
-                       <p>{formErrors.password}</p>
+                <PasswordInputField label="Password" name="password" value={formData.password} setFormData={setFormData} />
+                <p>{formErrors.password}</p>
 
-                   <Button label="Login" onClick={handleSubmit} />
-                   <Button label="Register" onClick={handleSubmit, routeChange} />
-
-                   </form>
-                   </div>
-                   )
-    }
-
-//const root = ReactDOM.createRoot(document.getElementById('root'));
-//root.render(<LoginForm />);
+                <Button label="Login" onClick={handleSubmit} />
+                <Button label="Register" onClick={routeChange} />
+            </div>
+        </form>
+      )
+  }
