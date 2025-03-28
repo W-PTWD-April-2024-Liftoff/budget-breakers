@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +23,7 @@ public class User extends BaseAbstractEntity{
     private String lastName;
 
     @NotBlank(message = "Date of Birth is required")
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @NotBlank(message = "Username is required")
     @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters")
@@ -39,7 +40,7 @@ public class User extends BaseAbstractEntity{
 
     private AccountType accountType;
 
-    public User(String firstName, String lastName, Date dateOfBirth, String username, String password, String email) {
+    public User(String firstName, String lastName, LocalDate dateOfBirth, String username, String password, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -68,11 +69,11 @@ public class User extends BaseAbstractEntity{
         this.lastName = lastName;
     }
 
-    public Date getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -103,7 +104,7 @@ public class User extends BaseAbstractEntity{
     public List<UserGroup> getUserGroups() {
         return userGroups;
     }
-      
+
     public boolean isMatchingPassword(String password) {
         return encoder.matches(password, pwHash);
     }
@@ -114,5 +115,19 @@ public class User extends BaseAbstractEntity{
 
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userGroups=" + userGroups +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", username='" + username + '\'' +
+                ", pwHash='" + pwHash + '\'' +
+                ", email='" + email + '\'' +
+                ", accountType=" + accountType +
+                '}';
     }
 }

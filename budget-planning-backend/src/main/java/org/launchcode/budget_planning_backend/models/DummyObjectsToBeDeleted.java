@@ -1,5 +1,6 @@
 package org.launchcode.budget_planning_backend.models;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,4 +31,12 @@ public class DummyObjectsToBeDeleted {
     public static int getOpenedUserGroupId() {
         return OPENED_USER_GROUP_ID;
     }
+
+    public static AccountType createDummyUser() {
+        LocalDate date = LocalDate.of(2003, 5, 10);
+        User user1 = new User("Cat", "Adams", date, "catadams", "password", "cat@cat.com");
+        DetermineAccountType.determineAccountType(user1);
+        return user1.getAccountType();
+    }
+
 }
