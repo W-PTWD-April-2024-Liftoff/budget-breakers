@@ -1,6 +1,5 @@
 package org.launchcode.budget_planning_backend.models.dto;
 import org.launchcode.budget_planning_backend.models.User;
-
 import java.time.LocalDate;
 
 public class RegisterFormDTO extends User {

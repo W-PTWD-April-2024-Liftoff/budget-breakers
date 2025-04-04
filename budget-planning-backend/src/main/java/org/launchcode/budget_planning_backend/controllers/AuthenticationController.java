@@ -1,9 +1,12 @@
 package org.launchcode.budget_planning_backend.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 //import org.launchcode.budget_planning_backend.data.UserRepository;
+import org.launchcode.budget_planning_backend.models.AccountTypeUtil;
 import org.launchcode.budget_planning_backend.models.dto.LoginFormDTO;
 import org.launchcode.budget_planning_backend.models.dto.RegisterFormDTO;
 import org.slf4j.Logger;
@@ -26,6 +29,14 @@ public class AuthenticationController {
     Map<String, String> response = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
+    private User findByUsername(String username) {
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
 //    @Autowired
 //    UserRepository userRepository;
 
@@ -36,6 +47,7 @@ public class AuthenticationController {
     public User getUserFromSession(HttpSession session) {
         return (User) session.getAttribute(userSessionKey);
     }
+
     //For persistence with database connection
 //        Integer userId = (Integer) session.getAttribute(userSessionKey);
 //        if (userId == null) {
@@ -94,9 +106,14 @@ public class AuthenticationController {
                 registerFormDTO.getUsername(),
                 registerFormDTO.getPassword(),
                 registerFormDTO.getVerifyPassword());
+
+        AccountTypeUtil.determineAccountType(newUser);
+
+        //userRepository.save(user);
         users.add(newUser);
         setUserInSession(request.getSession(), newUser);
         logger.info("User stored in session: " + newUser.getUsername());
+        logger.info("User acct type: " + newUser.getAccountType());
 
         response.put("message", "Registration successful");
         return ResponseEntity.ok(response);
@@ -104,42 +121,27 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> processLoginForm(@RequestBody @Valid LoginFormDTO loginFormDTO,
-
                                                                 Errors errors, HttpServletRequest request) {
 
-        logger.info("Session ID Login" .concat(request.getSession().getId()));
-        // Conform session is retrieved properly
+        String username = loginFormDTO.getUsername().trim();
+        logger.info("Session ID Login".concat(request.getSession().getId()));
+
         HttpSession session = request.getSession(false);
-        User sessionUser = getUserFromSession(session);
 
-        if (session == null) {
-            // If no session exists, create a new one
-            session = request.getSession(true); // true creates a new session if no session exists
-            logger.info("New session created with ID: " + session.getId());
-        } else {
-            logger.info("Session user: " + getUserFromSession(request.getSession()).getUsername());
-            logger.info("Session ID Login: " + session.getId());
-        }
-
-        logger.info("New login attempt for username: " + loginFormDTO.getUsername());
-
-        if (errors.hasErrors()) {
-            response.put("message", "Validation errors occurred");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-            user = getUserFromSession(request.getSession());
-        if (loginFormDTO.getUsername().equals(user.getUsername()) && (loginFormDTO.getPassword().equals(user.getPassword()))) {
-                setUserInSession(session, user);
-                response.put("message", "Login successful");
-                return ResponseEntity.ok(response);
+        User user = findByUsername(username);
+        if (user != null && loginFormDTO.getPassword().equals(user.getPassword())) {
+            if (session == null) {
+                session = request.getSession(true); // Create new session if invalid
             }
+            setUserInSession(session, user);
+            response.put("message", "Login successful");
+            return ResponseEntity.ok(response);
+        }
+        response.put("message", "Invalid credentials");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 
-                response.put("message", "Invalid credentials");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            //For persistence with database connection
+    //For persistence with database connection
 //        User theUser = userRepository.findByUsername(loginFormDTO.getUsername());
 //
 //        if (theUser == null) {
@@ -154,23 +156,29 @@ public class AuthenticationController {
 //            errors.rejectValue("password", "password.invalid", "Invalid password");
 //            model.addAttribute("title", "Log In");
 //            return "login";
-        }
 //
 //        setUserInSession(request.getSession(), theUser);
 
-        //return "redirect:";
+    //return "redirect:";
 //    }
 
 //logout functionality
-//    @GetMapping("/logout")
-//    public String ResponseEntity<Map<String, String>> logout(HttpServletRequest request){
-//        HttpSession session = request.getSession(false);
-//        if (sessions != null) {
-//          session.invalidate();
-//        }
-//        request.getSession().invalidate();
-//        response.put("message", "Logged out successfully");
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request, HttpServletResponse respond){
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute("user");
+            session.invalidate();
+        }
 
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setMaxAge(0); // Expire cookie
+        cookie.setPath("/"); // Clear cookie
+        cookie.setSecure(true);
+        respond.addCookie(cookie);
+
+        response.put("message", "Logged out successfully");
+        return ResponseEntity.ok(response);
+    }
+}
 //}

@@ -34,7 +34,8 @@ export default function LoginForm () {
         });
                 if(response.ok) {
                     const data = await response.json();
-                          navigate("/dashboard"); // Redirect to this page after login, can change to home if preferred
+                          navigate("/Home");
+
                         } else {
                           const errorData = await response.json();
                           alert(errorData.message || "Login failed");
