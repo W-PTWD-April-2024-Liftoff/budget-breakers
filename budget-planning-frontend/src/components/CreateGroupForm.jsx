@@ -3,6 +3,7 @@ import TextInputField from "./TextInputField";
 import TextAreaInputField from "./TextAreaInputField";
 import Button from "./Button";
 import ModalWindow from "./ModalWindow";
+import { useNavigate } from "react-router-dom";
 
 const CreateGroupForm = () => {
     const [formData, setFormData] = useState({name: "", description: ""});
@@ -10,6 +11,8 @@ const CreateGroupForm = () => {
     const [message, setMessage] = useState("");
     const [modalType, setModalType] = useState("success");
     const [showModal, setShowModal] = useState(false);
+    const [userID, setUserID] = useState(1)
+    let navigate = useNavigate();
 
     const failedMessage = "Oops! Something went wrong while creating your group. Please try again.";
     const successMessage = "Hooray! Your group has been successfully created.";
@@ -52,6 +55,11 @@ const CreateGroupForm = () => {
             });
     }
 
+    const handleClose = () => {
+        setShowModal(false);
+        navigate(`/groups/${userID}/list`);
+    }
+
     return (
         <form>
             <h1>Create a New Group</h1>
@@ -61,7 +69,7 @@ const CreateGroupForm = () => {
                 <TextAreaInputField label="Group Description" name="description" value={formData.description} setFormData={setFormData} />
                 <Button label="Create Group" onClick={handleSubmit} />
             </div>
-            <ModalWindow showState={showModal} message={message} type={modalType} onClose={() => setShowModal(false)} />
+            <ModalWindow showState={showModal} message={message} type={modalType} onClose={() => handleClose()} />
         </form>
     );
 };
