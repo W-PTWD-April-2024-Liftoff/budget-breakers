@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isAdult } from "../utils/userUtils.jsx";
+import useCurrentUser from '../hooks/useCurrentUser';
 
 function LoginCheck() {
   const [loggedIn, setLoggedIn] = useState(null);
   const navigate = useNavigate();
+  const { user, error: userError } = useCurrentUser();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -18,6 +21,7 @@ function LoginCheck() {
           navigate("/login");
         } else if (response.ok) {
           setLoggedIn(true);
+          isAdult(user);
         } else {
           setLoggedIn(false);
         }

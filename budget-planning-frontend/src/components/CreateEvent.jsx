@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams,useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DateInputField from "./DateInputField";
 import TextInputField from "./TextInputField";
 import NumericInputField from "./NumericInputField";
@@ -55,6 +55,7 @@ export default function CreateEvent() {
     }
     if (!formData.userGroupName) {
       newErrors.userGroupName = "Group is required.";
+      isValid = false;
     }
     setErrors(newErrors);
     return isValid;

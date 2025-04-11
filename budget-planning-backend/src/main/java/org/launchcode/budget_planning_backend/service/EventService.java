@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class EventService {
         Event event = new Event(eventDto.getEventName(), eventDto.getEventBudget(), eventDto.getEventLocation(), eventDto.getEventDescription(),
                 eventDto.getEventDate(), Status.OPEN, 0,group);
         event.setUserGroup(group);
+        event.setBudgetReached(false);
         group.addEvents(event);
         logger.info("Event Created Successfully".concat(event.toString()));
     }
@@ -29,10 +31,10 @@ public class EventService {
     public List<Event> getEvents(int userGroupId, User user){
         logger.info("User has access to group: " + userGroupService.hasAccessToGroups(userGroupId, user.getId()));
         List<Event> eventsList = new ArrayList<>();
-        if (userGroupService.hasAccessToGroups(userGroupId, user.getId())) {
+       if (userGroupService.hasAccessToGroups(userGroupId, user.getId())) {
             eventsList =userGroupService.getEventsFromGroup(userGroupId);
             logger.info("Events for group: " + userGroupId + eventsList);
-            return eventsList;
+           return eventsList;
         }
         return eventsList;
     }
@@ -48,6 +50,67 @@ public class EventService {
             }
         }
         return event;
+    }
+
+    public void setEventDtoForEvent(Event event, EventDTO eventDto){
+        eventDto.setEventId(event.getId());
+        eventDto.setEventName(event.getName());
+        eventDto.setEventEarnings(event.getEarnings());
+        eventDto.setEventBudget((event.getBudget()));
+        eventDto.setEventDescription(event.getDescription());
+        if(event.getDate() == null)eventDto.setEventDate( ""); else eventDto.setEventDate(  event.getDate().toString());
+        eventDto.setEventLocation(event.getLocation());
+        eventDto.setUserGroupName(event.getUserGroup().getName());
+        eventDto.setBudgetAchieved(event.isBudgetReached());
+    }
+
+    public void updateEvent(Event event, EventDTO eventDto){
+        event.setName(eventDto.getEventName());
+        event.setDescription(eventDto.getEventDescription());
+        event.setBudget(eventDto.getEventBudget());
+        event.setLocation(eventDto.getEventLocation());
+        if(!eventDto.getEventDate().isBlank()) {
+            event.setDate(LocalDate.parse(eventDto.getEventDate()));
+        }
+        event.setEarnings(eventDto.getEventEarnings());
+        isBudgetReachedForEvent(event);
+    }
+
+    public void setEventStatus(Event event){
+        //Set Status
+        if (event.getStatus() == Status.OPEN) {
+            event.setStatus(Status.IN_PROGRESS);
+        }
+        // event completion
+        if (event.getEarnings() == event.getBudget()) {
+            event.setStatus(Status.COMPLETE);
+        }
+    }
+    public void setContributionStatus(User user, Contributions contributions){
+        // based on the user type - set the status to "PENDING" - child, "COMPLETED" - ADULT"
+        if(user.getAccountType().equals(AccountType.ADULT)) {
+            contributions.setStatus(Status.COMPLETE);
+        }else{
+            contributions.setStatus(Status.PENDING);
+        }
+    }
+
+    public void addContributionToEvent(User user, Event event, Contributions contributions, double amountOfContribution){
+        if(!user.getAccountType().equals(AccountType.MINOR)){
+            event.setEarnings(event.getEarnings() + amountOfContribution);
+        }
+        logger.info(event.toString());
+        // add Contribution to an Event
+        contributions.setDate(LocalDate.now());
+        contributions.setAmountOfContribution(amountOfContribution);
+        contributions.setUser(user);
+        setContributionStatus(user, contributions);
+        contributions.setEventID(event.getId());
+        contributions.setEvent(event);
+        // Set event status
+        isBudgetReachedForEvent(event);
+        event.addContributions(contributions);
+        setEventStatus(event);
     }
 
     public List<ContributionDTO> getContributionsForEvent(User user,int userGroupId, int eventId){
@@ -79,5 +142,24 @@ public class EventService {
             }
         }
         return  contributions;
+    }
+
+    public Contributions getContribution(Event event, int contributionId){
+            List<Contributions> contributions = event.getContributions();
+            for(Contributions contribution: contributions){
+                if(contribution.getId() == contributionId){
+                    return contribution;
+                }
+            }
+            return null;
+    }
+
+    public void deleteEvent(User user, int userGroupId, int eventId){
+        Event event = getEventForGroup(user, userGroupId, eventId);
+        userGroupService.getEventsFromGroup(userGroupId).remove(event);
+    }
+
+    public void isBudgetReachedForEvent(Event event){
+        event.setBudgetReached(event.getEarnings() == event.getBudget() || event.getEarnings() > event.getBudget());
     }
 }

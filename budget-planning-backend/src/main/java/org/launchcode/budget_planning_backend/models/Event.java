@@ -29,6 +29,8 @@ public class Event extends AbstractEntity{
 
     private double earnings;
 
+    private boolean isBudgetReached;
+
     @JsonManagedReference
     private final List<Contributions> contributions = new ArrayList<>();
 
@@ -115,6 +117,14 @@ public class Event extends AbstractEntity{
         this.contributions.add(contributions);
     }
 
+    public boolean isBudgetReached() {
+        return isBudgetReached;
+    }
+
+    public void setBudgetReached(boolean budgetReached) {
+        isBudgetReached = budgetReached;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -126,6 +136,7 @@ public class Event extends AbstractEntity{
                 ", date= " + date +
                 ", status= " + status +
                 ", earnings= " + earnings +
+                ", isBudgetReached= " + isBudgetReached +
                 ", group= " + userGroup.getId()+userGroup.getName() +
                 '}';
     }

@@ -1,39 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import "../styles/choreListStyle.css";
-import axios from 'axios';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useNavigate } from 'react-router-dom';
+import React from 'react'
+import { useNavigate, useParams } from 'react-router-dom';
 import Button from "./Button";
+import { useFetchEvents } from '../hooks/useFetchEvents';
 
 export default function ViewEvents() {
-    const [events, setEvents ] = useState([]);
-    const [newErrors, setErrors] = useState(null);
-    const [userGroupId, setUserGroupId] = useState(1); 
-    let navigate = useNavigate(); 
-
-    useEffect(() => {
-        const getEvents = () => {
-          axios
-            .get(`http://localhost:8080/events/${userGroupId}/list`, { withCredentials: true })
-            .then((response) => {
-              setEvents(response.data);  
-              setErrors(null);  
-            })
-            .catch((err) => {
-              setErrors('Failed to load events');
-              console.error(err);
-            });
-        };
     
-        getEvents();
-      }, [userGroupId]);
+    const {groupID} = useParams(); 
+    const { events, error, loading: eventLoading } = useFetchEvents(groupID);
+    let navigate = useNavigate(); 
       
-      if (newErrors) return <div>{newErrors}</div>;
+    if (error) return <div>{error}</div>;
+    if (eventLoading) return <p>Loading Events...</p>;
 
-      function handleClick(event) {
-        console.log(`Event clicked: ${event.name}`);
-        navigate(`/events/${userGroupId}/${event.id}`);
-      }
+    function handleClick(event) {
+      console.log(`Event clicked: ${event.name}`);
+      navigate(`/events/${groupID}/${event.id}`);
+    }
   return (
     <div className="tiles-container">
         <div className="tile-list">

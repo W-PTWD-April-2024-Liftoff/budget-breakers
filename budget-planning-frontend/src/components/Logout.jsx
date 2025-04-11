@@ -15,6 +15,7 @@ export default function Logout() {
         if (response.ok) {
           localStorage.removeItem("authToken");
           sessionStorage.removeItem("authToken")
+          sessionStorage.removeItem("isAdult");
           navigateLogout("/login"); // Redirect to login
         } else {
           console.error("Logout failed");

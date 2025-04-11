@@ -12,6 +12,7 @@ public class EventDTO {
     private String eventDate;
     private double eventEarnings;
     private String userGroupName;
+    private boolean isBudgetAchieved;
 
     public EventDTO(){}
 
@@ -77,5 +78,28 @@ public class EventDTO {
 
     public void setUserGroupName(String userGroupName) {
         this.userGroupName = userGroupName;
+    }
+
+    public boolean isBudgetAchieved() {
+        return isBudgetAchieved;
+    }
+
+    public void setBudgetAchieved(boolean budgetAchieved) {
+        isBudgetAchieved = budgetAchieved;
+    }
+
+    @Override
+    public String toString() {
+        return "EventDTO{" +
+                "eventId=" + eventId +
+                ", eventName='" + eventName + '\'' +
+                ", eventBudget=" + eventBudget +
+                ", eventLocation='" + eventLocation + '\'' +
+                ", eventDescription='" + eventDescription + '\'' +
+                ", eventDate='" + eventDate + '\'' +
+                ", eventEarnings=" + eventEarnings +
+                ", userGroupName='" + userGroupName + '\'' +
+                ", isBudgetAchieved='" + isBudgetAchieved + '\'' +
+                '}';
     }
 }
