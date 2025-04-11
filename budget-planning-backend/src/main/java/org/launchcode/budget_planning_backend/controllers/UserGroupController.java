@@ -1,10 +1,10 @@
 package org.launchcode.budget_planning_backend.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Email;
 import org.launchcode.budget_planning_backend.models.User;
 import org.launchcode.budget_planning_backend.models.UserGroup;
 import org.launchcode.budget_planning_backend.models.dto.UserGroupDTO;
+import org.launchcode.budget_planning_backend.service.EmailService;
 import org.launchcode.budget_planning_backend.service.AuthenticationService;
 import org.launchcode.budget_planning_backend.service.UserGroupService;
 import org.slf4j.Logger;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
-
 @RestController
 @RequestMapping(value="/groups")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -29,11 +28,28 @@ public class UserGroupController {
     UserGroupService groupService;
 
     @Autowired
+    EmailService emailService;
+
+    @Autowired
     AuthenticationService authenticationService;
 
     @PostMapping(value="/create")
-    public void createNewGroup(@RequestBody UserGroupDTO userGroupDTO, HttpServletRequest request) {
-        groupService.saveGroups(groupService.createNewGroup(userGroupDTO, request));
+    public ResponseEntity<String> createNewGroup(@RequestBody UserGroupDTO userGroupDTO, HttpServletRequest request) {
+
+        UserGroup group = groupService.createNewGroup(userGroupDTO, request);
+        groupService.saveGroups(group);
+        String groupName = userGroupDTO.getName();
+        String groupDescription = userGroupDTO.getDescription();
+        List<String> emails = userGroupDTO.getEmails();
+
+        System.out.println("Emails received: " + emails);
+
+        String subject = "You are invited to join " + groupName + " on Red, Green, VACAY!";
+
+        for (String email : emails) {
+            emailService.sendEmailInvites(email, subject, groupName, groupDescription, group);
+        }
+        return ResponseEntity.ok("Group created successfully!");
     }
 
     @GetMapping(value = "/{userID}/list")
@@ -65,9 +81,7 @@ public class UserGroupController {
     }
 
     @PostMapping(value = "/{userID}/{groupID}/add-member")
-    public void addMembersToGroup( @PathVariable Integer groupID, @RequestBody Email email) {
-        groupService.addUsersToGroup(groupID, email);
+    public void addMembersToGroup( @PathVariable Integer groupID, User user) {
+        groupService.addUsersToGroup(groupID, user);
     }
-
-
 }

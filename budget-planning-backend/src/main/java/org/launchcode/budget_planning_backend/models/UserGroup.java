@@ -1,7 +1,6 @@
 package org.launchcode.budget_planning_backend.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.validation.constraints.Email;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public class UserGroup extends AbstractEntity{
 
     private  final List<Chore> chores = new ArrayList<>();
 
-    private final List<Email> userEmails = new ArrayList<>();
+    private final List<String> userEmails = new ArrayList<String>();
 
     public UserGroup(String name, String description){
         setName(name);
@@ -52,7 +51,7 @@ public class UserGroup extends AbstractEntity{
         this.chores.add(chore);
     }
 
-    public void addEmails(Email email) {
+    public void addEmails(String email) {
         this.userEmails.add(email);
     }
 

@@ -4,9 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.launchcode.budget_planning_backend.service.UserGroupService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,8 +36,6 @@ public class User extends BaseAbstractEntity{
     @NotBlank(message = "Password is required")
     private String verifyPassword;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid Email.Try Again")
     private String email;
 
     private AccountType accountType;

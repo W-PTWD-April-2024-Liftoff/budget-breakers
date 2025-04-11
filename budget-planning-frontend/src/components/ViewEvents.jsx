@@ -8,26 +8,26 @@ import Button from "./Button";
 export default function ViewEvents() {
     const [events, setEvents ] = useState([]);
     const [newErrors, setErrors] = useState(null);
-    const [userGroupId, setUserGroupId] = useState(1); 
-    let navigate = useNavigate(); 
+    const [userGroupId, setUserGroupId] = useState(1);
+    let navigate = useNavigate();
 
     useEffect(() => {
         const getEvents = () => {
           axios
             .get(`http://localhost:8080/events/${userGroupId}/list`, { withCredentials: true })
             .then((response) => {
-              setEvents(response.data);  
-              setErrors(null);  
+              setEvents(response.data);
+              setErrors(null);
             })
             .catch((err) => {
               setErrors('Failed to load events');
               console.error(err);
             });
         };
-    
+
         getEvents();
       }, [userGroupId]);
-      
+
       if (newErrors) return <div>{newErrors}</div>;
 
       function handleClick(event) {

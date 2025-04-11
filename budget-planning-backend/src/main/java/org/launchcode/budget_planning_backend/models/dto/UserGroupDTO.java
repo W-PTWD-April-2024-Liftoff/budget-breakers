@@ -13,6 +13,8 @@ public class UserGroupDTO extends AbstractEntity {
 
     private Chore chore;
 
+    private List<String> emails;
+
 //    private List<Email> userEmails;
 
     public UserGroupDTO() {}
@@ -39,6 +41,14 @@ public class UserGroupDTO extends AbstractEntity {
 
     public void setChore(Chore chore) {
         this.chore = chore;
+    }
+
+    public List<String> getEmails() {
+    return emails;
+    }
+
+    public void setEmails(List<String> emails) {
+        this.emails = emails;
     }
 
 //    public List<Email> getUserEmails() {
